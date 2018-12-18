@@ -21,6 +21,9 @@
 
         public IEnumerable<OrderDetail> Items { get; set; }
 
+        [DisplayFormat(DataFormatString = "{0:N0}")]
+        public int Lines { get { return this.Items == null ? 0 : this.Items.Count(); } }
+
         [DisplayFormat(DataFormatString = "{0:N2}")]
         public double Quantity { get { return this.Items == null ? 0 : this.Items.Sum(i => i.Quantity); } }
 

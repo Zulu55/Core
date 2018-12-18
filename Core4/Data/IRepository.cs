@@ -22,9 +22,15 @@
 
         void UpdateProduct(Product product);
 
+        Task ConfirmOrderAsync(string userName);
+
         Task<IEnumerable<Order>> GetOrdersAsync(string userName);
 
         Task<IEnumerable<OrderDetailTemp>> GetDetailTempsAsync(string userName);
+
+        Task DeleteDetailTempAsync(int id);
+
+        Task<OrderDetailTemp> GetDetailTempAsync(int id);
 
         IEnumerable<SelectListItem> GetComboProducts();
 

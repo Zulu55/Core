@@ -17,6 +17,24 @@ namespace Core4.Controllers
             this.repository = repository;
         }
 
+        public async Task<IActionResult> ConfirmOrder()
+        {
+            await this.repository.ConfirmOrderAsync(this.User.Identity.Name);
+            return this.RedirectToAction("Index");
+        }
+
+        public async Task<IActionResult> DeleteItem(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            await this.repository.DeleteDetailTempAsync(id.Value);
+            return this.RedirectToAction("Create");
+        }
+
+
         public async Task<IActionResult> Index()
         {
             var model = await this.repository.GetOrdersAsync(this.User.Identity.Name);

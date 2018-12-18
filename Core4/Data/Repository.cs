@@ -4,7 +4,9 @@
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc.Rendering;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Logging;
     using Models;
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
@@ -13,11 +15,16 @@
     {
         private readonly DataContext context;
         private readonly UserManager<User> userManager;
+        private readonly ILogger<DataContext> logger;
 
-        public Repository(DataContext context, UserManager<User> userManager)
+        public Repository(
+            DataContext context, 
+            UserManager<User> userManager, 
+            ILogger<DataContext> logger)
         {
             this.context = context;
             this.userManager = userManager;
+            this.logger = logger;
         }
 
         public IEnumerable<Product> GetProducts()
@@ -164,6 +171,61 @@
                 this.context.OrderDetailTemps.Update(orderDetailTemp);
                 await this.context.SaveChangesAsync();
             }
+        }
+
+        public async Task<OrderDetailTemp> GetDetailTempAsync(int id)
+        {
+            var orderDetailTemp = await this.context.OrderDetailTemps.FindAsync(id);
+            return orderDetailTemp;
+        }
+
+        public async Task DeleteDetailTempAsync(int id)
+        {
+            var orderDetailTemp = await this.context.OrderDetailTemps.FindAsync(id);
+            if (orderDetailTemp == null)
+            {
+                return;
+            }
+
+            this.context.OrderDetailTemps.Remove(orderDetailTemp);
+            await this.context.SaveChangesAsync();
+        }
+
+        public async Task ConfirmOrderAsync(string userName)
+        {
+            var user = await this.userManager.FindByNameAsync(userName);
+            if (user == null)
+            {
+                return;
+            }
+
+            var orderTmps = await this.context.OrderDetailTemps
+                .Include(o => o.Product)
+                .Where(o => o.User == user)
+                .ToListAsync();
+
+            if (orderTmps == null || orderTmps.Count == 0)
+            {
+                return;
+            }
+
+            var details = orderTmps.Select(o => new OrderDetail
+            {
+                Price = o.Price,
+                Product = o.Product,
+                Quantity = o.Quantity
+            }).ToList();
+
+            var order = new Order
+            {
+                OrderDate = DateTime.UtcNow,
+                User = user,
+                Items = details,
+            };
+
+            this.context.Orders.Add(order);
+            this.context.OrderDetailTemps.RemoveRange(orderTmps);
+            await this.context.SaveChangesAsync();
         }
     }
 }
