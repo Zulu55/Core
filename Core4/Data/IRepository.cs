@@ -22,7 +22,7 @@
 
         void UpdateProduct(Product product);
 
-        Task ConfirmOrderAsync(string userName);
+        Task<bool> ConfirmOrderAsync(string userName);
 
         Task<IEnumerable<Order>> GetOrdersAsync(string userName);
 

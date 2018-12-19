@@ -19,8 +19,13 @@ namespace Core4.Controllers
 
         public async Task<IActionResult> ConfirmOrder()
         {
-            await this.repository.ConfirmOrderAsync(this.User.Identity.Name);
-            return this.RedirectToAction("Index");
+            var response = await this.repository.ConfirmOrderAsync(this.User.Identity.Name);
+            if (response)
+            {
+                return this.RedirectToAction("Index");
+            }
+
+            return this.RedirectToAction("Create");
         }
 
         public async Task<IActionResult> DeleteItem(int? id)

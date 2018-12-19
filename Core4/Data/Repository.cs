@@ -79,12 +79,26 @@
                 return null;
             }
 
-            var orders = this.context.Orders
-                .Include(o => o.Items)
-                .ThenInclude(i => i.Product)
-                .Where(o => o.User == user)
-                .OrderBy(o => o.OrderDate);
-            return orders;
+            if (await this.userManager.IsInRoleAsync(user, "Admin"))
+            {
+                var orders = this.context.Orders
+                    .Include(o => o.User)
+                    .Include(o => o.Items)
+                    .ThenInclude(i => i.Product)
+                    .OrderBy(o => o.OrderDate);
+                return orders;
+            }
+            else
+            {
+                var orders = this.context.Orders
+                    .Include(o => o.User)
+                    .Include(o => o.Items)
+                    .ThenInclude(i => i.Product)
+                    .Where(o => o.User == user)
+                    .OrderBy(o => o.OrderDate);
+                return orders;
+
+            }
         }
 
         public async Task<IEnumerable<OrderDetailTemp>> GetDetailTempsAsync(string userName)
@@ -191,12 +205,12 @@
             await this.context.SaveChangesAsync();
         }
 
-        public async Task ConfirmOrderAsync(string userName)
+        public async Task<bool> ConfirmOrderAsync(string userName)
         {
             var user = await this.userManager.FindByNameAsync(userName);
             if (user == null)
             {
-                return;
+                return false;
             }
 
             var orderTmps = await this.context.OrderDetailTemps
@@ -206,7 +220,7 @@
 
             if (orderTmps == null || orderTmps.Count == 0)
             {
-                return;
+                return false;
             }
 
             var details = orderTmps.Select(o => new OrderDetail
@@ -226,6 +240,7 @@
             this.context.Orders.Add(order);
             this.context.OrderDetailTemps.RemoveRange(orderTmps);
             await this.context.SaveChangesAsync();
+            return true;
         }
     }
 }
