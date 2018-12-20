@@ -242,5 +242,43 @@
             await this.context.SaveChangesAsync();
             return true;
         }
+
+        public async Task DeleteOrderAsync(int id)
+        {
+            var order = await this.context.Orders
+                .Where(o => o.Id == id)
+                .Include(o => o.Items)
+                .FirstOrDefaultAsync();
+            if (order == null)
+            {
+                return;
+            }
+
+            if (order.DeliveryDate != DateTime.MinValue)
+            {
+                return;
+            }
+
+            this.context.Orders.Remove(order);
+            await this.context.SaveChangesAsync();
+        }
+
+        public async Task<Order> GetOrdersAsync(int id)
+        {
+            return await this.context.Orders.FindAsync(id);
+        }
+
+        public async Task DeliverOrder(DeliverViewModel model)
+        {
+            var order = await this.context.Orders.FindAsync(model.Id);
+            if (order == null)
+            {
+                return;
+            }
+
+            order.DeliveryDate = model.DeliveryDate;
+            this.context.Orders.Update(order);
+            await this.context.SaveChangesAsync();
+        }
     }
 }

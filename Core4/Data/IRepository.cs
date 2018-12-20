@@ -26,6 +26,10 @@
 
         Task<IEnumerable<Order>> GetOrdersAsync(string userName);
 
+        Task<Order> GetOrdersAsync(int id);
+
+        Task DeleteOrderAsync(int id);
+
         Task<IEnumerable<OrderDetailTemp>> GetDetailTempsAsync(string userName);
 
         Task DeleteDetailTempAsync(int id);
@@ -37,5 +41,7 @@
         Task AddItemToOrderAsync(AddItemViewModel model, string userName);
 
         Task ModifyOrderDetailTempQuantityAsync(int id, double quantity);
+
+        Task DeliverOrder(DeliverViewModel model);
     }
 }

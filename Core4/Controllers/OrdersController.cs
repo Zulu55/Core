@@ -17,6 +17,51 @@ namespace Core4.Controllers
             this.repository = repository;
         }
 
+        public async Task<IActionResult> Deliver(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var order = await this.repository.GetOrdersAsync(id.Value);
+            if (order == null)
+            {
+                return NotFound();
+            }
+
+            var model = new DeliverViewModel
+            {
+                Id = order.Id,
+                DeliveryDate = DateTime.Today
+            };
+
+            return View(model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Deliver(DeliverViewModel model)
+        {
+            if (this.ModelState.IsValid)
+            {
+                await this.repository.DeliverOrder(model);
+                return this.RedirectToAction("Index");
+            }
+
+            return this.View();
+        }
+
+        public async Task<IActionResult> Delete(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            await this.repository.DeleteOrderAsync(id.Value);
+            return this.RedirectToAction("Index");
+        }
+
         public async Task<IActionResult> ConfirmOrder()
         {
             var response = await this.repository.ConfirmOrderAsync(this.User.Identity.Name);
@@ -38,7 +83,6 @@ namespace Core4.Controllers
             await this.repository.DeleteDetailTempAsync(id.Value);
             return this.RedirectToAction("Create");
         }
-
 
         public async Task<IActionResult> Index()
         {
