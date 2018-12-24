@@ -1,5 +1,6 @@
 ﻿namespace Core4.Controllers
 {
+    using Core4.Data;
     using Data.Entities;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
@@ -18,15 +19,24 @@
         private readonly SignInManager<User> signInManager;
         private readonly UserManager<User> userManager;
         private readonly IConfiguration configuration;
+        private readonly IRepository repository;
 
         public AccountController(
             SignInManager<User> signInManager, 
             UserManager<User> userManager,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            IRepository repository)
         {
             this.signInManager = signInManager;
             this.userManager = userManager;
             this.configuration = configuration;
+            this.repository = repository;
+        }
+
+        public async Task<JsonResult> GetCities(int countryId)
+        {
+            var country = await this.repository.GetCountryAsync(countryId);
+            return this.Json(country.Cities.OrderBy(c => c.Name));
         }
 
         [HttpPost]
@@ -107,10 +117,15 @@
         {
             var user = await this.userManager.FindByEmailAsync(this.User.Identity.Name);
             var model = new ChangeUserViewModel();
+
             if (user != null)
             {
                 model.FirstName = user.FirstName;
                 model.LastName = user.LastName;
+                model.Address = user.Address;
+                model.PhoneNumber = user.PhoneNumber;
+                model.Cities = this.repository.GetComboCities(0);
+                model.Countries = this.repository.GetComboCountries();
             }
 
             return this.View(model);
@@ -147,7 +162,12 @@
 
         public IActionResult Register()
         {
-            return this.View();
+            var model = new RegisterNewUserViewModel
+            {
+                Countries = this.repository.GetComboCountries(),
+                Cities = this.repository.GetComboCities(0)
+            };
+            return this.View(model);
         }
 
         [HttpPost]
@@ -158,12 +178,17 @@
                 var user = await this.userManager.FindByEmailAsync(model.Username);
                 if (user == null)
                 {
+                    var city = await this.repository.GetCityAsync(model.CityId);
+
                     user = new User
                     {
                         FirstName = model.FirstName,
                         LastName = model.LastName,
                         Email = model.Username,
-                        UserName = model.Username
+                        UserName = model.Username,
+                        Address = model.Address,
+                        PhoneNumber = model.PhoneNumber,
+                        City = city
                     };
 
                     var result = await this.userManager.CreateAsync(user, model.Password);

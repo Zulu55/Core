@@ -1,4 +1,4 @@
-﻿@model IEnumerable<Core4.Data.Entities.Order>
+﻿@model Core4.Models.OrdersViewModel
 
 @{
     ViewData["Title"] = "Index";
@@ -9,32 +9,34 @@
 <p>
     <a asp-action="Create" class="btn btn-primary">Create New</a>
 </p>
+@if (Model.Orders.Count() > 0)
+{
 <table class="table">
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.User.FullName)
+                @Html.DisplayNameFor(model => model.Orders.FirstOrDefault().User.FullName)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.OrderDate)
+                @Html.DisplayNameFor(model => model.Orders.FirstOrDefault().OrderDate)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.DeliveryDate)
+                @Html.DisplayNameFor(model => model.Orders.FirstOrDefault().DeliveryDate)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Lines)
+                @Html.DisplayNameFor(model => model.Orders.FirstOrDefault().Lines)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Quantity)
+                @Html.DisplayNameFor(model => model.Orders.FirstOrDefault().Quantity)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Value)
+                @Html.DisplayNameFor(model => model.Orders.FirstOrDefault().Value)
             </th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-        @foreach (var item in Model)
+        @foreach (var item in Model.Orders)
         {
             <tr>
                 <td>
@@ -59,13 +61,14 @@
                     @Html.DisplayFor(modelItem => item.Value)
                 </td>
                 <td id="@item.Id">
-                    <a asp-action="Deliver" asp-route-id="@item.Id" class="btn btn-info">Deliver</a>
+                    <a asp-action="Deliver" asp-route-id="@item.Id" class="btn btn-info" id="btnDeliver">Deliver</a>
                     <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger" id="btnDelete">Delete</a>
                 </td>
             </tr>
         }
     </tbody>
 </table>
+}
 
 <div id="deleteDialog" class="modal fade">
     <div class="modal-dialog modal-sm">
@@ -80,6 +83,38 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-danger" id="btnYesDelete">Delete</button>
                 <button type="button" class="btn btn-success" id="btnNoDelete">No</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="deliverDialog" class="modal fade">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><i class="fa fa-window-close"></i></button>
+                <h4 class="modal-title">Deliver Order</h4>
+            </div>
+            <div class="modal-body">
+                <form asp-action="Deliver">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                    <div class="form-group">
+                        <label asp-for="DeliveryDate" class="control-label"></label>
+                        <div class="input-group date" data-provide="datepicker">
+                            <input asp-for="DeliveryDate" class="form-control" />
+                            <span class="input-group-addon">
+                                <span class="glyphicon glyphicon-calendar"></span>
+                            </span>
+                        </div>
+                        <span asp-validation-for="DeliveryDate" class="text-danger"></span>
+                    </div>
+
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary" id="btnYesDeliver">Deliver</button>
+                <button type="button" class="btn btn-success" id="btnNoDeliver">Cancel</button>
             </div>
         </div>
     </div>
@@ -105,9 +140,11 @@
                 return false;
             });
 
+
             $("#btnYesDelete").click(function () {
                 window.location.href = '/Orders/Delete/' + id;
             });
+
         });
     </script>
 }

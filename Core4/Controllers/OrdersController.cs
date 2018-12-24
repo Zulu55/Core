@@ -1,6 +1,8 @@
 ﻿using Core4.Data;
+using Core4.Data.Entities;
 using Core4.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -51,6 +53,7 @@ namespace Core4.Controllers
             return this.View();
         }
 
+
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -86,7 +89,18 @@ namespace Core4.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var model = await this.repository.GetOrdersAsync(this.User.Identity.Name);
+            var orders = await this.repository.GetOrdersAsync(this.User.Identity.Name);
+            if (orders == null)
+            {
+                orders = new List<Order>();
+            }
+
+            var model = new OrdersViewModel
+            {
+                DeliveryDate = DateTime.Today,
+                Orders = orders
+            };
+
             return View(model);
         }
 
