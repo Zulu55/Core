@@ -124,8 +124,19 @@
                 model.LastName = user.LastName;
                 model.Address = user.Address;
                 model.PhoneNumber = user.PhoneNumber;
-                model.Cities = this.repository.GetComboCities(0);
-                model.Countries = this.repository.GetComboCountries();
+
+                var city = await this.repository.GetCityAsync(user.CityId);
+                if (city != null)
+                {
+                    var country = await this.repository.GetCountryAsync(city);
+                    if (country != null)
+                    {
+                        model.CountryId = country.Id;
+                        model.Cities = this.repository.GetComboCities(country.Id);
+                        model.Countries = this.repository.GetComboCountries();
+                        model.CityId = user.CityId;
+                    }
+                }
             }
 
             return this.View(model);
@@ -139,8 +150,15 @@
                 var user = await this.userManager.FindByEmailAsync(this.User.Identity.Name);
                 if (user != null)
                 {
+                    var city = await this.repository.GetCityAsync(model.CityId);
+
                     user.FirstName = model.FirstName;
                     user.LastName = model.LastName;
+                    user.Address = model.Address;
+                    user.PhoneNumber = model.PhoneNumber;
+                    user.CityId = model.CityId;
+                    user.City = city;
+
                     var respose = await this.userManager.UpdateAsync(user);
                     if (respose.Succeeded)
                     {
@@ -188,6 +206,7 @@
                         UserName = model.Username,
                         Address = model.Address,
                         PhoneNumber = model.PhoneNumber,
+                        CityId = model.CityId,
                         City = city
                     };
 

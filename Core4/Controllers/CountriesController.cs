@@ -1,9 +1,9 @@
 ﻿namespace Core4.Controllers
 {
-    using Core4.Models;
     using Data;
     using Data.Entities;
     using Microsoft.AspNetCore.Mvc;
+    using Models;
     using System.Threading.Tasks;
 
     public class CountriesController : Controller
@@ -132,7 +132,6 @@
             return View(country);
         }
 
-        // GET: Countries/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)

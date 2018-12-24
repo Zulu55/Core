@@ -57,6 +57,7 @@
                     UserName = "jzuluaga55@gmail.com",
                     Address = "Calle Luna Calle Sol",
                     PhoneNumber = "350 634 2747",
+                    CityId = this.context.Countries.FirstOrDefault().Cities.FirstOrDefault().Id,
                     City = this.context.Countries.FirstOrDefault().Cities.FirstOrDefault()
                 };
 
