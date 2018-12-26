@@ -175,6 +175,8 @@
                 }
             }
 
+            model.Cities = this.repository.GetComboCities(model.CountryId);
+            model.Countries = this.repository.GetComboCountries();
             return this.View(model);
         }
 
